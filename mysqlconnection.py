@@ -3,13 +3,11 @@ import pymysql.cursors
 
 class MySQLConnection:
     def __init__(self, db=None):
-        # Use Railway's environment variables
         connection = pymysql.connect(
-            host=os.getenv('MYSQLHOST', 'localhost'),
-            user=os.getenv('MYSQLUSER', 'root'),
-            password=os.getenv('MYSQLPASSWORD', ''),
-            db=os.getenv('MYSQLDATABASE', db),
-            port=int(os.getenv('MYSQLPORT', 3306)),
+            host=os.getenv('DB_HOST', 'nozomi.proxy.rlwy.net'),
+            user=os.getenv('DB_USER', 'root'),
+            password=os.getenv('DB_PASSWORD', 'srnLtucTexMTNTanvhqbSRKGRMyhBhIW'),
+            db=os.getenv('DB_NAME', db or 'railway'),
             charset='utf8mb4',
             cursorclass=pymysql.cursors.DictCursor,
             autocommit=True
