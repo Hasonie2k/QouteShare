@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='index.css') }}">
+    <title>Login or register</title>
+</head>
+<body>
+        <div class="bg-animated"></div>
+        <div class="login-container">
+            {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="flash-message">{{ message }}</div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+            <div id="section-1" style="width:100%;">
+                <form action='/register/user' method="POST" style="width:100%;">
+                    <div class="login-title">Register</div>
+                    <label for="first_name">First Name:</label>
+                    <input type="text" name="first_name" required>
+                    <label for="last_name">Last Name:</label>
+                    <input type="text" name="last_name" required>
+                    <label for="user_name">Username:</label>
+                    <input type="text" name="user_name" required>
+                    <label for="email">Email:</label>
+                    <input type="email" name="email" required>
+                    <label for="password">Password:</label>
+                    <input type="password" name="password" required>
+                    <label for="confirm_password">Confirm Password:</label>
+                    <input type="password" name="confirm_password" required>
+                    <button type="submit" class="login-btn">Register</button>
+                </form>
+            </div>
+            <div id="section-2" style="width:100%; margin-top:32px;">
+                <form action="/login" method="POST" style="width:100%;">
+                    <div class="login-title">Login</div>
+                    <label for="login_email">Email:</label>
+                    <input type="email" name="email" id="login_email" required>
+                    <label for="login_password">Password:</label>
+                    <input type="password" name="password" id="login_password" required>
+                    <button type="submit" class="login-btn">Login</button>
+                </form>
+            </div>
+        </div>
+</body>
+</html>

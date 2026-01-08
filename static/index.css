@@ -1,0 +1,158 @@
+/* ------------------------------ */
+/* Dark Minimalist Login/Register */
+/* ------------------------------ */
+
+/* Reset and base */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
+}
+
+body {
+  background: #23232b;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+/* Floating card container */
+.login-container {
+  background: linear-gradient(135deg, #18181c 80%, #81c784 100%);
+  border-radius: 18px;
+  box-shadow: 0 6px 32px rgba(129,199,132,0.18);
+  padding: 48px 38px 38px 38px;
+  min-width: 340px;
+  max-width: 400px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  z-index: 2;
+  animation: floatCard 3.5s infinite ease-in-out alternate;
+}
+
+@keyframes floatCard {
+  0% { transform: translateY(0px); }
+  100% { transform: translateY(-12px); }
+}
+
+/* Title */
+.login-title {
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 28px;
+  letter-spacing: 1px;
+  text-shadow: 0 2px 8px #23232b;
+}
+
+/* Labels */
+label {
+  font-size: 1.08rem;
+  color: #fff;
+  margin-bottom: 8px;
+  font-weight: 500;
+  align-self: flex-start;
+}
+
+/* Inputs */
+input[type="text"],
+input[type="email"],
+input[type="password"] {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 8px;
+  border: 1px solid #444;
+  font-size: 1.08rem;
+  margin-bottom: 18px;
+  background: #23232b;
+  color: #fff;
+  outline: none;
+  box-shadow: 0 2px 8px rgba(129,199,132,0.10);
+  transition: border 0.2s, box-shadow 0.2s;
+}
+
+input:focus {
+  border: 1.5px solid #81c784;
+  box-shadow: 0 0 0 2px #81c78433;
+}
+
+/* Buttons */
+.login-btn {
+  background: linear-gradient(90deg, #81c784 0%, #66bb6a 100%);
+  color: #23232b;
+  font-weight: 600;
+  padding: 12px 32px;
+  border-radius: 8px;
+  font-size: 1.08rem;
+  box-shadow: 0 2px 12px rgba(129,199,132,0.12);
+  border: none;
+  cursor: pointer;
+  margin: 8px 0 24px 0;
+  transition: all 0.2s ease;
+}
+
+.login-btn:hover {
+  background: linear-gradient(90deg, #66bb6a 0%, #81c784 100%);
+  color: #18181c;
+  transform: scale(1.04);
+}
+
+/* Flash messages */
+
+.flash-message {
+  display: block;
+  width: 100%;
+  max-width: 380px;
+  margin: 0 auto 24px auto;
+  background: linear-gradient(90deg, #ff5252 0%, #ffb74d 100%);
+  color: #23232b;
+  border-radius: 10px;
+  padding: 16px 24px;
+  font-size: 1.12rem;
+  font-weight: 700;
+  text-align: center;
+  border: 2px solid #fff176;
+  box-shadow: 0 4px 18px rgba(255, 82, 82, 0.18);
+  z-index: 10;
+  animation: flashPop 0.5s cubic-bezier(.68,-0.55,.27,1.55);
+}
+
+@keyframes flashPop {
+  0% { opacity: 0; transform: scale(0.8) translateY(-50%); }
+  100% { opacity: 1; transform: scale(1) translateY(-50%); }
+}
+
+.login-container {
+  position: relative;
+}
+
+/* Animated background */
+.bg-animated {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: radial-gradient(circle at 20% 30%, #81c78433 0%, #23232b 60%),
+              radial-gradient(circle at 80% 70%, #66bb6a22 0%, #23232b 70%);
+  animation: bgMove 8s infinite alternate ease-in-out;
+}
+
+@keyframes bgMove {
+  0% { background-position: 20% 30%, 80% 70%; }
+  100% { background-position: 30% 40%, 70% 60%; }
+}
+
+/* Neon focus effect */
+.login-container:focus-within {
+  box-shadow: 0 0 0 4px #81c78455, 0 6px 32px rgba(129,199,132,0.18);
+}
+
+/* Hide scrollbars */
+body::-webkit-scrollbar { display: none; }
+body { -ms-overflow-style: none; scrollbar-width: none; }

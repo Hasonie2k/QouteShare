@@ -1,0 +1,103 @@
+
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<title>Create Quote</title>
+		<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='Create.css') }}">
+		<style>
+			body {
+				background: #23232b;
+				font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
+				margin: 0;
+				min-height: 100vh;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+			}
+			.create-card {
+				background: #18181c;
+				border-radius: 16px;
+				box-shadow: 0 4px 24px rgba(129,199,132,0.10);
+				padding: 40px 32px 32px 32px;
+				min-width: 340px;
+				max-width: 400px;
+				width: 100%;
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+			}
+			h1 {
+				font-size: 2rem;
+				font-weight: 700;
+				color: #fff;
+				margin-bottom: 24px;
+				letter-spacing: 0.5px;
+			}
+			label {
+				font-size: 1.08rem;
+				color: #fff;
+				margin-bottom: 8px;
+				font-weight: 500;
+				align-self: flex-start;
+			}
+			input[type="text"] {
+				width: 100%;
+				padding: 10px 12px;
+				border-radius: 8px;
+				border: 1px solid #444;
+				font-size: 1.08rem;
+				margin-bottom: 18px;
+				background: #23232b;
+				color: #fff;
+				box-sizing: border-box;
+				outline: none;
+				transition: border 0.2s;
+			}
+			input[type="text"]:focus {
+				border: 1.5px solid #81c784;
+			}
+			.back-link {
+				display: inline-block;
+				margin-top: 18px;
+				color: #81c784;
+				text-decoration: none;
+				font-weight: 600;
+				font-size: 1rem;
+				transition: color 0.2s;
+			}
+			.back-link:hover {
+				color: #fff;
+				text-decoration: underline;
+			}
+			.flash-message {
+				background: #23232b;
+				color: #81c784;
+				border-radius: 6px;
+				padding: 8px 16px;
+				margin-bottom: 18px;
+				font-size: 1rem;
+				text-align: center;
+				border: 1px solid #81c784;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="create-card">
+			{% with messages = get_flashed_messages() %}
+				{% if messages %}
+					{% for message in messages %}
+						<div class="flash-message">{{ message }}</div>
+					{% endfor %}
+				{% endif %}
+			{% endwith %}
+			<h1>Create Quote</h1>
+			<form action="{{ url_for('add_quote') }}" method="POST" style="width:100%;">
+				<label for="qoute">Quote:</label>
+				<input type="text" name="qoute" id="qoute" required>
+				<input type="submit" value="Create" class="create-quote-btn">
+			</form>
+			<a href="{{ url_for('home') }}" class="back-link">Back to home</a>
+		</div>
+	</body>
+</html>

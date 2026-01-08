@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Edit Comment</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='update.css') }}">
+</head>
+<body style="background: linear-gradient(135deg, #18181c 0%, #23232b 100%); color: #eaeaea; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: flex-start;">
+    <div class="container" style="width:100%; max-width:400px; margin-top:48px; background:rgba(32,32,40,0.98); border-radius:16px; box-shadow:0 4px 24px rgba(0,0,0,0.18); padding:32px 28px;">
+        <h1 style="font-size:2rem; font-weight:700; color:#fff; text-align:center; margin-bottom:28px;">Edit Comment</h1>
+        <form action="{{ url_for('edit_comment', quote_id=quote_id, comment_idx=comment_idx) }}" method="POST" style="display:flex; flex-direction:column; gap:18px;">
+            <div style="display:flex; flex-direction:column; gap:6px;">
+                <label for="comment_text" style="font-weight:600; color:#81c784;">Comment:</label>
+                <input type="text" name="comment_text" id="comment_text" value="{{ comment.text }}" style="background:#23232b; color:#eaeaea; border:1px solid #333; border-radius:6px; padding:8px; font-size:1rem;">
+            </div>
+            <input type="submit" value="Update Comment" class="create-quote-btn">
+        </form>
+        <div style="text-align:center; margin-top:18px;">
+            <a href="{{ url_for('home') }}" class="create-quote-btn" style="background:linear-gradient(90deg,#23232b 0%,#23232b 100%); color:#81c784;">Back to home</a>
+        </div>
+    </div>
+</body>
+</html>

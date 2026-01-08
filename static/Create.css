@@ -1,0 +1,119 @@
+body {
+	background: #23232b;
+	font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
+	margin: 0;
+	min-height: 100vh;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.create-card {
+	background: #18181c;
+	border-radius: 16px;
+	box-shadow: 0 4px 24px rgba(129,199,132,0.10);
+	padding: 40px 32px 32px 32px;
+	min-width: 340px;
+	max-width: 400px;
+	width: 100%;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+}
+
+h1 {
+	font-size: 2rem;
+	font-weight: 700;
+	color: #fff;
+	margin-bottom: 24px;
+	letter-spacing: 0.5px;
+}
+
+label {
+	font-size: 1.08rem;
+	color: #fff;
+	margin-bottom: 8px;
+	font-weight: 500;
+	align-self: flex-start;
+}
+
+input[type="text"] {
+	width: 100%;
+	padding: 10px 12px;
+	border-radius: 8px;
+	border: 1px solid #444;
+	font-size: 1.08rem;
+	margin-bottom: 18px;
+	background: #23232b;
+	color: #fff;
+	box-sizing: border-box;
+	outline: none;
+	transition: border 0.2s;
+}
+input[type="text"]:focus {
+	border: 1.5px solid #81c784;
+}
+
+.back-link {
+	display: inline-block;
+	margin-top: 18px;
+	color: #81c784;
+	text-decoration: none;
+	font-weight: 600;
+	font-size: 1rem;
+	transition: color 0.2s;
+}
+.back-link:hover {
+	color: #fff;
+	text-decoration: underline;
+}
+
+.flash-message {
+	background: #23232b;
+	color: #81c784;
+	border-radius: 6px;
+	padding: 8px 16px;
+	margin-bottom: 18px;
+	font-size: 1rem;
+	text-align: center;
+	border: 1px solid #81c784;
+}
+/* Modern button style for consistency with home.css and update.css */
+.create-quote-btn {
+	display: inline-block;
+	background: linear-gradient(90deg, #81c784 0%, #66bb6a 100%);
+	color: #23232b;
+	font-weight: 600;
+	padding: 10px 28px;
+	border-radius: 8px;
+	font-size: 1.08rem;
+	box-shadow: 0 2px 12px rgba(129,199,132,0.12);
+	text-decoration: none;
+	transition: background 0.2s, transform 0.2s;
+	margin-bottom: 24px;
+	margin-top: 8px;
+}
+.create-quote-btn:hover {
+	background: linear-gradient(90deg, #66bb6a 0%, #81c784 100%);
+	color: #18181c;
+	transform: scale(1.04);
+	text-decoration: none;
+}
+
+button, input[type="submit"] {
+	background: #23232b;
+	color: #fff;
+	border: none;
+	border-radius: 6px;
+	padding: 8px 18px;
+	font-size: 1rem;
+	margin: 6px 4px;
+	box-shadow: 0 2px 8px rgba(129,199,132,0.08);
+	cursor: pointer;
+	transition: background 0.2s, transform 0.2s;
+}
+button:hover, input[type="submit"]:hover {
+	background: #81c784;
+	color: #23232b;
+	transform: scale(1.04);
+}
