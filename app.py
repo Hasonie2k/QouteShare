@@ -2,8 +2,11 @@
 from flask import Flask, render_template, redirect, request, url_for, flash, session
 from model import User
 from model_q import Qoute
+from model_c import Comment
 import re
 from flask_bcrypt import Bcrypt
+
+from flask import abort
 
 app = Flask(__name__)
 app.secret_key = 'very_secret'
@@ -58,12 +61,10 @@ def home():
         flash('Session expired. Please log in again.')
         return redirect(url_for('login'))
     quotes = Qoute.get_all()
-    # attach author_name and comments from session
-    comments = session.get('comments', {})
     for q in quotes:
         author = User.get_by_id(q.users_id)
         q.author_name = (author.user_name if author and getattr(author, 'user_name', None) else (author.first_name if author else 'Unknown'))
-        q.comments = comments.get(str(q.id), [])
+        q.comments = Comment.get_by_quote_id(q.id)
 
     last_quote = session.pop('last_quote', None)
     if last_quote:
@@ -73,7 +74,7 @@ def home():
             last_q = last_quote
         author = User.get_by_id(last_q.users_id)
         last_q.author_name = (author.user_name if author and getattr(author, 'user_name', None) else (author.first_name if author else 'Unknown'))
-        last_q.comments = comments.get(str(getattr(last_q, 'id', '')), [])
+        last_q.comments = Comment.get_by_quote_id(getattr(last_q, 'id', ''))
         last_quote = last_q
 
     return render_template('home.html', user=user, quotes=quotes, last_quote=last_quote)
@@ -120,15 +121,17 @@ def add_comment(quote_id):
         flash('Comment cannot be empty.')
         return redirect(url_for('home'))
     import datetime
-    comments = session.get('comments', {})
-    key = str(quote_id)
-    comments.setdefault(key, []).append({
+    data = {
+        'quote_id': quote_id,
+        'user_id': user.id,
         'author': user.user_name or user.first_name,
         'text': text,
         'date': datetime.date.today().isoformat(),
-        'edited': False
-    })
-    session['comments'] = comments
+        'edited': False,
+        'likes': 0,
+        'dislikes': 0
+    }
+    Comment.add_comment(data)
     return redirect(url_for('home'))
 
 # Add route to update a comment
@@ -141,13 +144,12 @@ def edit_comment(quote_id, comment_idx):
         session.clear()
         flash('Session expired. Please log in again.')
         return redirect(url_for('login'))
-    comments = session.get('comments', {})
-    key = str(quote_id)
-    if key not in comments or not (0 <= comment_idx < len(comments[key])):
+    comments = Comment.get_by_quote_id(quote_id)
+    if not (0 <= comment_idx < len(comments)):
         flash('Comment not found.')
         return redirect(url_for('home'))
-    comment = comments[key][comment_idx]
-    if comment['author'] != (user.user_name or user.first_name):
+    comment = comments[comment_idx]
+    if comment.author != (user.user_name or user.first_name):
         flash('You can only edit your own comments.')
         return redirect(url_for('home'))
     if request.method == 'POST':
@@ -155,9 +157,7 @@ def edit_comment(quote_id, comment_idx):
         if not new_text:
             flash('Comment cannot be empty.')
             return redirect(url_for('home'))
-        comment['text'] = new_text
-        comment['edited'] = True
-        session['comments'] = comments
+        Comment.update_comment(comment.id, {'text': new_text, 'edited': True})
         return redirect(url_for('home'))
     return render_template('edit_comment.html', user=user, comment=comment, quote_id=quote_id, comment_idx=comment_idx)
 
@@ -296,19 +296,134 @@ def delete_comment(quote_id, comment_idx):
         session.clear()
         flash('Session expired. Please log in again.')
         return redirect(url_for('login'))
-    comments = session.get('comments', {})
-    key = str(quote_id)
-    if key in comments and 0 <= comment_idx < len(comments[key]):
-        comment = comments[key][comment_idx]
-        if comment['author'] == (user.user_name or user.first_name):
-            comments[key].pop(comment_idx)
-            session['comments'] = comments
-            flash('Comment deleted.')
-        else:
-            flash('You can only delete your own comments.')
-    else:
+    comments = Comment.get_by_quote_id(quote_id)
+    if not (0 <= comment_idx < len(comments)):
         flash('Comment not found.')
+        return redirect(url_for('home'))
+    comment = comments[comment_idx]
+    if comment.author == (user.user_name or user.first_name):
+        Comment.delete_comment(comment.id)
+        flash('Comment deleted.')
+    else:
+        flash('You can only delete your own comments.')
     return redirect(url_for('home'))
+
+
+
+# Route to handle liking a quote
+@app.route('/like/<int:quote_id>', methods=['POST'])
+def like_quote(quote_id):
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    user_id = session['user_id']
+    liked_quotes = set(session.get('liked_quotes', []))
+    quote = Qoute.get_by_id(quote_id)
+    if not quote:
+        abort(404)
+    if str(quote_id) in liked_quotes:
+        # Unlike: decrement likes (not below 0)
+        new_likes = max((quote.likes or 1) - 1, 0)
+        liked_quotes.remove(str(quote_id))
+        flash('You unliked this quote!')
+    else:
+        # Like: increment likes
+        new_likes = (quote.likes or 0) + 1
+        liked_quotes.add(str(quote_id))
+        flash('You liked this quote!')
+    data = {
+        'id': quote.id,
+        'name': quote.name,
+        'comment': quote.comment,
+        'qoute': quote.qoute,
+        'users_id': quote.users_id,
+        'post_date': quote.post_date,
+        'dislikes': quote.dislikes or 0,
+        'likes': new_likes
+    }
+    Qoute.update_quote_by_id(data)
+    session['liked_quotes'] = list(liked_quotes)
+    return redirect(url_for('home'))
+
+# Route to handle disliking a quote (toggle)
+@app.route('/dislike/<int:quote_id>', methods=['POST'])
+def dislike_quote(quote_id):
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    user_id = session['user_id']
+    disliked_quotes = set(session.get('disliked_quotes', []))
+    quote = Qoute.get_by_id(quote_id)
+    if not quote:
+        abort(404)
+    if str(quote_id) in disliked_quotes:
+        # Remove dislike
+        new_dislikes = max((quote.dislikes or 1) - 1, 0)
+        disliked_quotes.remove(str(quote_id))
+        flash('You removed your dislike!')
+    else:
+        # Add dislike
+        new_dislikes = (quote.dislikes or 0) + 1
+        disliked_quotes.add(str(quote_id))
+        flash('You disliked this quote!')
+    data = {
+        'id': quote.id,
+        'name': quote.name,
+        'comment': quote.comment,
+        'qoute': quote.qoute,
+        'users_id': quote.users_id,
+        'post_date': quote.post_date,
+        'dislikes': new_dislikes,
+        'likes': quote.likes or 0
+    }
+    Qoute.update_quote_by_id(data)
+    session['disliked_quotes'] = list(disliked_quotes)
+    return redirect(url_for('home'))
+
+# Like/dislike a comment (toggle)
+@app.route('/like_comment/<int:quote_id>/<int:comment_idx>', methods=['POST'])
+def like_comment(quote_id, comment_idx):
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    comments = Comment.get_by_quote_id(quote_id)
+    if not (0 <= comment_idx < len(comments)):
+        flash('Comment not found.')
+        return redirect(url_for('home'))
+    comment = comments[comment_idx]
+    liked_comments = set(session.get('liked_comments', []))
+    comment_key = f'{quote_id}:{comment_idx}'
+    if comment_key in liked_comments:
+        # Unlike
+        Comment.like_comment(comment.id, increment=False)
+        liked_comments.remove(comment_key)
+    else:
+        # Like
+        Comment.like_comment(comment.id, increment=True)
+        liked_comments.add(comment_key)
+    session['liked_comments'] = list(liked_comments)
+    return redirect(url_for('home'))
+
+@app.route('/dislike_comment/<int:quote_id>/<int:comment_idx>', methods=['POST'])
+def dislike_comment(quote_id, comment_idx):
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    comments = Comment.get_by_quote_id(quote_id)
+    if not (0 <= comment_idx < len(comments)):
+        flash('Comment not found.')
+        return redirect(url_for('home'))
+    comment = comments[comment_idx]
+    disliked_comments = set(session.get('disliked_comments', []))
+    comment_key = f'{quote_id}:{comment_idx}'
+    if comment_key in disliked_comments:
+        # Remove dislike
+        Comment.dislike_comment(comment.id, increment=False)
+        disliked_comments.remove(comment_key)
+    else:
+        # Add dislike
+        Comment.dislike_comment(comment.id, increment=True)
+        disliked_comments.add(comment_key)
+    session['disliked_comments'] = list(disliked_comments)
+    return redirect(url_for('home'))
+
+
 
 
 if __name__ == "__main__":

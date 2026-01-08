@@ -57,11 +57,24 @@ class Qoute:
 
     @classmethod
     def update_quote_by_id(cls, data):
+        # Only update provided fields, fallback to current values for missing ones
+        quote = cls.get_by_id(data['id'])
+        if not quote:
+            return None
+        update_data = {
+            'id': data['id'],
+            'name': data.get('name', quote.name),
+            'comment': data.get('comment', quote.comment),
+            'qoute': data.get('qoute', quote.qoute),
+            'post_date': data.get('post_date', quote.post_date),
+            'dislikes': data.get('dislikes', quote.dislikes),
+            'likes': data.get('likes', quote.likes)
+        }
         query = (
             "UPDATE qouteschema.Qoute SET name=%(name)s, comment=%(comment)s, qoute=%(qoute)s, "
             "post_date=%(post_date)s, dislikes=%(dislikes)s, likes=%(likes)s WHERE id=%(id)s;"
         )
-        return connectToMySQL('qouteschema').query_db(query, data)
+        return connectToMySQL('qouteschema').query_db(query, update_data)
 
 
     @staticmethod

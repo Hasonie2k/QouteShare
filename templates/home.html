@@ -1,106 +1,166 @@
 <!doctype html>
 <html lang="en">
-	<head>
-		<meta charset="utf-8">
-		<title>Home</title>
-		<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='home.css') }}">
-	</head>
-	<body>
-		{% with messages = get_flashed_messages() %}
-			{% if messages %}
-				{% for message in messages %}
-					<p>{{ message }}</p>
-				{% endfor %}
-			{% endif %}
-		{% endwith %}
+<head>
+  <meta charset="utf-8">
+  <title>Home</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='home.css') }}">
+</head>
+<body>
 
-		<h1>Hello {{ user.user_name if user.user_name else user.first_name }}</h1>
+  {% with messages = get_flashed_messages() %}
+    {% if messages %}
+      {% for message in messages %}
+        <p class="flash">{{ message }}</p>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
 
-		<form action="{{ url_for('logout') }}" method="get" style="display:inline;">
-			<button type="submit">Logout</button>
-		</form>
+  <h1>Hello {{ user.user_name if user.user_name else user.first_name }}</h1>
 
-		<p><a href="{{ url_for('create') }}">Create a new quote</a></p>
+  <div class="top-actions">
+    <a href="{{ url_for('create') }}" class="create-quote-btn">+ Share a Quote</a>
 
-		{% if quotes %}
-			<h3>All quotes</h3>
-			<div class="quotes-grid">
-				{% for q in quotes %}
-					<div class="quote-card">
-						<div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
-							<span style="font-weight: 600; color: #81c784;">{{ q.author_name }}</span>
-							<span style="color: #888; font-size: 0.95em;">
-								{% if q.post_date %}
-									{% if q.post_date.__class__.__name__ == 'date' or q.post_date.__class__.__name__ == 'datetime' %}{{ q.post_date.strftime('%m/%d/%Y') }}{% else %}{{ q.post_date.split(' ')[0].replace('-', '/') }}{% endif %}
-								{% endif %}
-								{% if session['edited_quotes'] and q.id in session['edited_quotes'] %}
-									<span style="margin-left:6px;">(edited)</span>
-								{% endif %}
-							</span>
-						</div>
-						<div class="quote-text" style="font-size: 1.15rem; color: #fff; margin-bottom: 10px; font-weight: 500;">{{ q.qoute }}</div>
-						{% if q.users_id %}
-							<button type="button" onclick="toggleForm({{ q.id }})">Comment</button>
-							<div id="comment-{{ q.id }}" style="display:none; margin-top:8px;">
-								<form action="{{ url_for('add_comment', quote_id=q.id) }}" method="POST">
-									<textarea name="comment_text" rows="3" cols="40"></textarea>
-									<br>
-									<input type="submit" value="Post Comment">
-								</form>
-							</div>
-						{% else %}
-							<p><em>Cannot comment on unsaved quote.</em></p>
-						{% endif %}
+    <form action="{{ url_for('logout') }}" method="get">
+      <button type="submit">Logout</button>
+    </form>
+  </div>
 
-						{% if q.users_id == user.id %}
-							<form action="{{ url_for('delete_quote_by_id', quote_id=q.id) }}" method="POST" style="display:inline;">
-								<button type="submit" onclick="return confirm('Delete this quote?')">Delete Quote</button>
-							</form>
-							<form action="{{ url_for('update_quote', users_id=q.id) }}" method="GET" style="display:inline;">
-								<button type="submit">Update Quote</button>
-							</form>
-						{% endif %}
+  {% if quotes %}
+  <h3>All Quotes</h3>
 
-						{% if q.comments %}
-							<div style="margin-top:8px;">
-								<ul style="padding-left:0;">
-									{% for c in q.comments %}
-										<li style="background:#23232b; border-radius:8px; padding:10px 14px; margin-bottom:7px; font-size:1rem; color:#eaeaea; box-shadow:0 1px 4px rgba(129,199,132,0.08); display:flex; align-items:center; gap:10px;">
-											<div style="display:flex; flex-direction:column; align-items:flex-start; min-width:70px;">
-												<span style="font-weight:600; color:#ffb74d;">{{ c.author }}</span>
-												{% if c.date %}
-													<span style="color:#888; font-size:0.75em; margin-top:2px;">{{ c.date }}</span>
-												{% endif %}
-											</div>
-											{% if c.edited %}
-												<span style="color:#888; font-size:0.85em; margin-left:6px;">(edited)</span>
-											{% endif %}
-											<span style="flex:1; color:#eaeaea; margin-left:8px;">{{ c.text }}</span>
-											{% if c.author == (user.user_name if user.user_name else user.first_name) %}
-												<form action="{{ url_for('delete_comment', quote_id=q.id, comment_idx=loop.index0) }}" method="POST" style="display:inline; margin-left:8px;">
-													<button type="submit" onclick="return confirm('Delete this comment?')">Delete</button>
-												</form>
-												<form action="{{ url_for('edit_comment', quote_id=q.id, comment_idx=loop.index0) }}" method="GET" style="display:inline; margin-left:4px;">
-													<button type="submit">Edit</button>
-												</form>
-											{% endif %}
-										</li>
-									{% endfor %}
-								</ul>
-							</div>
-						{% endif %}
-					</div>
-				{% endfor %}
-			</div>
-		{% endif %}
+  <div class="quotes-grid">
+    {% for q in quotes %}
+    <div class="quote-card">
 
-		<script>
-			function toggleForm(id){
-				const el = document.getElementById('comment-' + id);
-				if(!el) return;
-				el.style.display = (el.style.display === 'none') ? 'block' : 'none';
-			}
-		</script>
+      <!-- Author + date -->
+      <div class="quote-header">
+        <span class="author">{{ q.author_name }}</span>
+        <span class="date">
+          {% if q.post_date %}
+            {% if q.post_date.__class__.__name__ in ['date','datetime'] %}
+              {{ q.post_date.strftime('%m/%d/%Y') }}
+            {% else %}
+              {{ q.post_date.split(' ')[0].replace('-', '/') }}
+            {% endif %}
+          {% endif %}
+          {% if session['edited_quotes'] and q.id in session['edited_quotes'] %}
+            <span class="edited">(edited)</span>
+          {% endif %}
+        </span>
+      </div>
 
-	</body>
+      <!-- Quote -->
+      <div class="quote-text">&quot;{{ q.qoute }}&quot;</div>
+
+      <!-- Actions -->
+      <div class="quote-actions">
+
+        <!-- Social -->
+        <div class="quote-social">
+          <form action="{{ url_for('like_quote', quote_id=q.id) }}" method="POST">
+            <button class="icon-btn" type="submit">
+              {% if q.id|string in session.get('liked_quotes', []) %}👎{% else %}👍{% endif %}
+            </button>
+            <span class="count like">{{ q.likes or 0 }}</span>
+          </form>
+
+          <form action="{{ url_for('dislike_quote', quote_id=q.id) }}" method="POST">
+            <button class="icon-btn" type="submit">
+              {% if q.id|string in session.get('disliked_quotes', []) %}👍{% else %}👎{% endif %}
+            </button>
+            <span class="count dislike">{{ q.dislikes or 0 }}</span>
+          </form>
+
+          {% if q.users_id %}
+          <button class="icon-btn" type="button" onclick="toggleForm({{ q.id }})">💬</button>
+          {% endif %}
+        </div>
+
+        <!-- Owner -->
+        {% if q.users_id == user.id %}
+        <div class="quote-owner-actions">
+          <form action="{{ url_for('update_quote', users_id=q.id) }}" method="GET">
+            <button class="text-btn">Edit</button>
+          </form>
+          <form action="{{ url_for('delete_quote_by_id', quote_id=q.id) }}" method="POST">
+            <button class="text-btn danger"
+              onclick="return confirm('Delete this quote?')">
+              Delete
+            </button>
+          </form>
+        </div>
+        {% endif %}
+      </div>
+
+      <!-- Comment box -->
+      {% if q.users_id %}
+      <div id="comment-{{ q.id }}" class="comment-box">
+        <form action="{{ url_for('add_comment', quote_id=q.id) }}" method="POST">
+          <textarea name="comment_text" rows="3" placeholder="Write a comment..."></textarea>
+          <input type="submit" value="Post Comment">
+        </form>
+      </div>
+      {% endif %}
+
+      <!-- Comments -->
+      {% if q.comments %}
+      <ul class="comments">
+        {% for c in q.comments %}
+        <li>
+          <div class="comment-meta">
+            <strong>{{ c.author }}</strong>
+            {% if c.date %}<span>{{ c.date }}</span>{% endif %}
+            {% if c.edited %}<em>(edited)</em>{% endif %}
+          </div>
+
+          <div class="comment-text">{{ c.text }}</div>
+
+          <!-- Like/Dislike for comments -->
+          <div class="comment-social">
+            <form action="{{ url_for('like_comment', quote_id=q.id, comment_idx=loop.index0) }}" method="POST" style="display:inline;">
+              {% set liked_comments = session.get('liked_comments', []) %}
+              <button type="submit" class="icon-btn">
+                {% set comment_key = q.id|string ~ ':' ~ loop.index0 %}
+                {% if comment_key in liked_comments %}👎{% else %}👍{% endif %}
+              </button>
+              <span class="count like">{{ c.likes if c.likes is defined else 0 }}</span>
+            </form>
+            <form action="{{ url_for('dislike_comment', quote_id=q.id, comment_idx=loop.index0) }}" method="POST" style="display:inline;">
+              {% set disliked_comments = session.get('disliked_comments', []) %}
+              <button type="submit" class="icon-btn">
+                {% if comment_key in disliked_comments %}👍{% else %}👎{% endif %}
+              </button>
+              <span class="count dislike">{{ c.dislikes if c.dislikes is defined else 0 }}</span>
+            </form>
+          </div>
+
+          {% if c.author == (user.user_name if user.user_name else user.first_name) %}
+          <div class="comment-actions">
+            <form action="{{ url_for('delete_comment', quote_id=q.id, comment_idx=loop.index0) }}" method="POST">
+              <button class="text-btn danger">Delete</button>
+            </form>
+            <form action="{{ url_for('edit_comment', quote_id=q.id, comment_idx=loop.index0) }}" method="GET">
+              <button class="text-btn">Edit</button>
+            </form>
+          </div>
+          {% endif %}
+        </li>
+        {% endfor %}
+      </ul>
+      {% endif %}
+
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <script>
+    function toggleForm(id) {
+      const el = document.getElementById('comment-' + id);
+      if (!el) return;
+      el.style.display = el.style.display === 'block' ? 'none' : 'block';
+    }
+  </script>
+
+</body>
 </html>
