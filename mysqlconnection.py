@@ -4,11 +4,11 @@ import pymysql.cursors
 class MySQLConnection:
     def __init__(self, db=None):
         self.connection = pymysql.connect(
-            host=os.getenv('MYSQL_HOST', 'nozomi.proxy.rlwy.net'),
-            user=os.getenv('MYSQL_USER', 'root'),
-            password=os.getenv('MYSQL_PASSWORD', 'srnLtucTexMTNTanvhqbSRKGRMyhBhIW'),
-            db=os.getenv('MYSQL_DATABASE', db or 'railway'),
-            port=int(os.getenv('MYSQL_PORT', 58910)),
+            host=os.getenv('MYSQLHOST', 'nozomi.proxy.rlwy.net'),
+            user=os.getenv('MYSQLUSER', 'root'),
+            password=os.getenv('MYSQLPASSWORD', 'srnLtucTexMTNTanvhqbSRKGRMyhBhIW'),
+            db=os.getenv('MYSQLDATABASE', db or 'railway'),
+            port=int(os.getenv('MYSQLPORT', 58910)),
             charset='utf8mb4',
             cursorclass=pymysql.cursors.DictCursor,
             autocommit=True
