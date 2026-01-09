@@ -185,8 +185,7 @@ def update_quote(quote_id):
             'users_id': user.id,
             'post_date': datetime.date.today().isoformat(),
             'likes': quote.likes or 0,
-            'dislikes': quote.dislikes or 0,
-            'edited': True
+            'dislikes': quote.dislikes or 0
         }
         Qoute.update_quote_by_id(data)
         return redirect(url_for('home'))
@@ -231,8 +230,7 @@ def like_quote(quote_id):
         'users_id': quote.users_id,
         'post_date': quote.post_date,
         'likes': quote.likes,
-        'dislikes': quote.dislikes,
-        'edited': getattr(quote, 'edited', False)
+        'dislikes': quote.dislikes
     }
     Qoute.update_quote_by_id(data)
     session['liked_quotes'] = list(liked_quotes)
@@ -260,8 +258,7 @@ def dislike_quote(quote_id):
         'users_id': quote.users_id,
         'post_date': quote.post_date,
         'likes': quote.likes,
-        'dislikes': quote.dislikes,
-        'edited': getattr(quote, 'edited', False)
+        'dislikes': quote.dislikes
     }
     Qoute.update_quote_by_id(data)
     session['disliked_quotes'] = list(disliked_quotes)
