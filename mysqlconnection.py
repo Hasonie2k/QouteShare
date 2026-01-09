@@ -8,7 +8,7 @@ class MySQLConnection:
             user=os.getenv('MYSQLUSER', 'root'),
             password=os.getenv('MYSQLPASSWORD', 'srnLtucTexMTNTanvhqbSRKGRMyhBhIW'),
             db=os.getenv('MYSQLDATABASE', db or 'railway'),
-            port=int(os.getenv('MYSQLPORT', 3306)),
+            port=int(os.getenv('MYSQLPORT', 58910)),
             charset='utf8mb4',
             cursorclass=pymysql.cursors.DictCursor,
             autocommit=True
