@@ -29,6 +29,22 @@ body {
   color: #eaeaea;
   min-height: 100vh;
   padding: 40px 16px;
+  overflow-y: auto;
+  /* Always show vertical scrollbar for clarity */
+  scrollbar-width: thin;
+  scrollbar-color: #81c784 #23232b;
+}
+
+/* Optional: Custom scrollbar for Webkit browsers */
+body::-webkit-scrollbar {
+  width: 10px;
+}
+body::-webkit-scrollbar-thumb {
+  background: #81c784;
+  border-radius: 6px;
+}
+body::-webkit-scrollbar-track {
+  background: #23232b;
 }
 
 /* Headings */
