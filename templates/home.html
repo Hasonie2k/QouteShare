@@ -54,15 +54,14 @@
         <!-- Social -->
         <div class="quote-social">
           <form action="{{ url_for('like_quote', quote_id=q.id) }}" method="POST">
-            <button class="icon-btn" type="submit">
-              {% if q.id|string in session.get('liked_quotes', []) %}👎{% else %}👍{% endif %}
+            <button class="icon-btn {% if q.id|string in session.get('liked_quotes', []) %}liked{% endif %}" type="submit" title="Like">
+              👍
             </button>
             <span class="count like">{{ q.likes or 0 }}</span>
           </form>
-
           <form action="{{ url_for('dislike_quote', quote_id=q.id) }}" method="POST">
-            <button class="icon-btn" type="submit">
-              {% if q.id|string in session.get('disliked_quotes', []) %}👍{% else %}👎{% endif %}
+            <button class="icon-btn {% if q.id|string in session.get('disliked_quotes', []) %}disliked{% endif %}" type="submit" title="Dislike">
+              👎
             </button>
             <span class="count dislike">{{ q.dislikes or 0 }}</span>
           </form>
@@ -109,15 +108,14 @@
           <div class="comment-social">
             <form action="{{ url_for('like_comment', quote_id=q.id, comment_idx=loop.index0) }}" method="POST">
               {% set comment_key = q.id|string ~ ':' ~ loop.index0 %}
-              <button type="submit">
-                {% if comment_key in session.get('liked_comments', []) %}👎{% else %}👍{% endif %}
+              <button class="icon-btn {% if comment_key in session.get('liked_comments', []) %}liked{% endif %}" type="submit" title="Like">
+                👍
               </button>
               <span class="count like">{{ c.likes or 0 }}</span>
             </form>
-
             <form action="{{ url_for('dislike_comment', quote_id=q.id, comment_idx=loop.index0) }}" method="POST">
-              <button type="submit">
-                {% if comment_key in session.get('disliked_comments', []) %}👍{% else %}👎{% endif %}
+              <button class="icon-btn {% if comment_key in session.get('disliked_comments', []) %}disliked{% endif %}" type="submit" title="Dislike">
+                👎
               </button>
               <span class="count dislike">{{ c.dislikes or 0 }}</span>
             </form>
