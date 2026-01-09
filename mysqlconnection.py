@@ -3,20 +3,20 @@ import pymysql.cursors
 
 class MySQLConnection:
     def __init__(self, db=None):
-        connection = pymysql.connect(
-            host=os.getenv('DB_HOST', 'nozomi.proxy.rlwy.net'),
-            user=os.getenv('DB_USER', 'root'),
-            password=os.getenv('DB_PASSWORD', 'srnLtucTexMTNTanvhqbSRKGRMyhBhIW'),
-            db=os.getenv('DB_NAME', db or 'railway'),
+        self.connection = pymysql.connect(
+            host=os.getenv('MYSQL_HOST', 'nozomi.proxy.rlwy.net'),
+            user=os.getenv('MYSQL_USER', 'root'),
+            password=os.getenv('MYSQL_PASSWORD', 'srnLtucTexMTNTanvhqbSRKGRMyhBhIW'),
+            db=os.getenv('MYSQL_DATABASE', db or 'railway'),
+            port=int(os.getenv('MYSQL_PORT', 58910)),
             charset='utf8mb4',
             cursorclass=pymysql.cursors.DictCursor,
             autocommit=True
         )
-        self.connection = connection
 
     def query_db(self, query: str, data: dict = None):
-        with self.connection.cursor() as cursor:
-            try:
+        try:
+            with self.connection.cursor() as cursor:
                 cursor.execute(query, data)
                 if query.lower().startswith("insert"):
                     return cursor.lastrowid
@@ -24,11 +24,10 @@ class MySQLConnection:
                     return cursor.fetchall()
                 else:
                     return True
-            except Exception as e:
-                print("Something went wrong:", e)
-                return False
-            finally:
-                self.connection.close()
+        except Exception as e:
+            print("Database query error:", e)
+            return False
+        # DO NOT close connection here — keep it open per request
 
 def connectToMySQL(db=None):
     return MySQLConnection(db)
