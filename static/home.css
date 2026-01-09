@@ -126,6 +126,7 @@ h3 {
   align-items: center;
 }
 
+
 .icon-btn {
   width: 42px;
   height: 42px;
@@ -135,11 +136,41 @@ h3 {
   cursor: pointer;
   box-shadow: 0 2px 8px rgba(129,199,132,0.08);
   font-size: 1.1rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s, color 0.2s;
 }
 
 .icon-btn:hover {
   background: #81c784;
   color: #23232b;
+}
+
+/* Ensure text-btn is not affected by icon-btn styles */
+.text-btn, .text-btn.danger {
+  width: auto;
+  height: auto;
+  border-radius: 6px;
+  background: transparent;
+  border: 1px solid #333;
+  color: #bbb;
+  padding: 6px 14px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  box-shadow: none;
+  margin: 0 2px;
+  transition: background 0.2s, color 0.2s;
+  display: inline-block;
+}
+.text-btn:hover {
+  color: #81c784;
+  background: rgba(129,199,132,0.15);
+}
+.text-btn.danger:hover {
+  color: #ff5252;
+  background: rgba(255,82,82,0.15);
 }
 
 .count {
