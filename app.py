@@ -79,13 +79,14 @@ def add_quote():
         return redirect(url_for('home'))
 
     data = {
-        'name': user.user_name or user.first_name,
-        'qoute': request.form.get('qoute'),
-        'users_id': user.id,
-        'post_date': datetime.date.today().isoformat(),
-        'likes': 0,
-        'dislikes': 0
-    }
+            'name': user.user_name or user.first_name,
+            'comment': '',
+            'qoute': request.form.get('qoute'),
+            'users_id': user.id,
+            'post_date': datetime.date.today().isoformat(),
+            'likes': 0,
+            'dislikes': 0
+        }
     new_id = Qoute.save_quote(data)
     data['id'] = new_id
     session['last_quote'] = data
