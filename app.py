@@ -134,6 +134,29 @@ def add_comment(quote_id):
     Comment.add_comment(data)
     return redirect(url_for('home'))
 
+# ------------------- EDIT COMMENT -------------------
+@app.route('/edit_comment/<int:quote_id>/<int:comment_idx>', methods=['GET', 'POST'])
+def edit_comment(quote_id, comment_idx):
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    user = User.get_by_id(session['user_id'])
+    comments = Comment.get_by_quote_id(quote_id)
+    if not (0 <= comment_idx < len(comments)):
+        flash('Comment not found.')
+        return redirect(url_for('home'))
+    comment = comments[comment_idx]
+    if comment.author != (user.user_name or user.first_name):
+        flash('You can only edit your own comments.')
+        return redirect(url_for('home'))
+    if request.method == 'POST':
+        new_text = request.form.get('comment_text', '').strip()
+        if not new_text:
+            flash('Comment cannot be empty.')
+            return redirect(url_for('home'))
+        Comment.update_comment(comment.id, {'text': new_text, 'edited': True})
+        return redirect(url_for('home'))
+    return render_template('edit_comment.html', user=user, comment=comment, quote_id=quote_id, comment_idx=comment_idx)
+
 # ------------------- EDIT/DELETE QUOTES -------------------
 
 @app.route('/edit/quote/<int:quote_id>', methods=['GET', 'POST'])
