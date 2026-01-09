@@ -57,6 +57,7 @@ h1 {
 h3 {
   color: #81c784;
   margin-bottom: 20px;
+  text-align: center;
 }
 
 /* Flash */
@@ -278,4 +279,20 @@ input[type="submit"], button {
   margin-top: 6px;
   display: flex;
   gap: 6px;
+}
+
+/* Logout button styling */
+.top-actions form[action$="logout"] button {
+  background: #23232b;
+  color: #fff;
+  border: 2px solid #ff5252;
+  border-radius: 8px;
+  padding: 10px 26px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+.top-actions form[action$="logout"] button:hover {
+  background: #ff5252;
+  color: #fff;
 }
