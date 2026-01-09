@@ -236,6 +236,7 @@ def like_quote(quote_id):
     }
     Qoute.update_quote_by_id(data)
     session['liked_quotes'] = list(liked_quotes)
+    flash(f"Quote {quote_id} liked! New like count: {quote.likes}")
     return redirect(url_for('home'))
 
 @app.route('/dislike/<int:quote_id>', methods=['POST'])
@@ -264,6 +265,7 @@ def dislike_quote(quote_id):
     }
     Qoute.update_quote_by_id(data)
     session['disliked_quotes'] = list(disliked_quotes)
+    flash(f"Quote {quote_id} disliked! New dislike count: {quote.dislikes}")
     return redirect(url_for('home'))
 
 # ------------------- LIKE/DISLIKE COMMENTS -------------------
