@@ -134,6 +134,49 @@ def add_comment(quote_id):
     Comment.add_comment(data)
     return redirect(url_for('home'))
 
+# ------------------- EDIT/DELETE QUOTES -------------------
+
+@app.route('/edit/quote/<int:quote_id>', methods=['GET', 'POST'])
+def update_quote(quote_id):
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    user = User.get_by_id(session['user_id'])
+    quote = Qoute.get_by_id(quote_id)
+    if not quote or quote.users_id != user.id:
+        return redirect(url_for('home'))
+    if request.method == 'POST':
+        if not Qoute.validate_quote(request.form):
+            return redirect(url_for('update_quote', quote_id=quote_id))
+        data = {
+            'id': quote.id,
+            'name': user.user_name or user.first_name,
+            'qoute': request.form.get('qoute'),
+            'users_id': user.id,
+            'post_date': datetime.date.today().isoformat(),
+            'likes': quote.likes or 0,
+            'dislikes': quote.dislikes or 0,
+            'edited': True
+        }
+        edited_quotes = set(session.get('edited_quotes', []))
+        edited_quotes.add(quote.id)
+        session['edited_quotes'] = list(edited_quotes)
+        Qoute.update_quote_by_id(data)
+        return redirect(url_for('home'))
+    return render_template('update.html', user=user, quote=quote)
+
+@app.route('/delete_quote/<int:quote_id>', methods=['POST'])
+def delete_quote_by_id(quote_id):
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    user = User.get_by_id(session['user_id'])
+    quote = Qoute.get_by_id(quote_id)
+    if quote and quote.users_id == user.id:
+        Qoute.delete_quote_by_id(quote_id)
+        flash('Quote deleted.')
+    else:
+        flash('You can only delete your own quotes.')
+    return redirect(url_for('home'))
+
 # ------------------- LIKE/DISLIKE QUOTES -------------------
 
 @app.route('/like/<int:quote_id>', methods=['POST'])
@@ -141,8 +184,6 @@ def like_quote(quote_id):
     if 'user_id' not in session:
         return redirect(url_for('login'))
     quote = Qoute.get_by_id(quote_id)
-    if not quote:
-        abort(404)
     liked_quotes = set(session.get('liked_quotes', []))
     if str(quote_id) in liked_quotes:
         quote.likes = max((quote.likes or 1) - 1, 0)
@@ -159,8 +200,6 @@ def dislike_quote(quote_id):
     if 'user_id' not in session:
         return redirect(url_for('login'))
     quote = Qoute.get_by_id(quote_id)
-    if not quote:
-        abort(404)
     disliked_quotes = set(session.get('disliked_quotes', []))
     if str(quote_id) in disliked_quotes:
         quote.dislikes = max((quote.dislikes or 1) - 1, 0)
@@ -172,10 +211,70 @@ def dislike_quote(quote_id):
     session['disliked_quotes'] = list(disliked_quotes)
     return redirect(url_for('home'))
 
+# ------------------- LIKE/DISLIKE COMMENTS -------------------
+
+@app.route('/like_comment/<int:quote_id>/<int:comment_idx>', methods=['POST'])
+def like_comment(quote_id, comment_idx):
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    comments = Comment.get_by_quote_id(quote_id)
+    if not (0 <= comment_idx < len(comments)):
+        flash('Comment not found.')
+        return redirect(url_for('home'))
+    comment = comments[comment_idx]
+    liked_comments = set(session.get('liked_comments', []))
+    key = f'{quote_id}:{comment_idx}'
+    if key in liked_comments:
+        Comment.like_comment(comment.id, increment=False)
+        liked_comments.remove(key)
+    else:
+        Comment.like_comment(comment.id, increment=True)
+        liked_comments.add(key)
+    session['liked_comments'] = list(liked_comments)
+    return redirect(url_for('home'))
+
+@app.route('/dislike_comment/<int:quote_id>/<int:comment_idx>', methods=['POST'])
+def dislike_comment(quote_id, comment_idx):
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    comments = Comment.get_by_quote_id(quote_id)
+    if not (0 <= comment_idx < len(comments)):
+        flash('Comment not found.')
+        return redirect(url_for('home'))
+    comment = comments[comment_idx]
+    disliked_comments = set(session.get('disliked_comments', []))
+    key = f'{quote_id}:{comment_idx}'
+    if key in disliked_comments:
+        Comment.dislike_comment(comment.id, increment=False)
+        disliked_comments.remove(key)
+    else:
+        Comment.dislike_comment(comment.id, increment=True)
+        disliked_comments.add(key)
+    session['disliked_comments'] = list(disliked_comments)
+    return redirect(url_for('home'))
+
+# ------------------- DELETE COMMENTS -------------------
+
+@app.route('/delete_comment/<int:quote_id>/<int:comment_idx>', methods=['POST'])
+def delete_comment(quote_id, comment_idx):
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    user = User.get_by_id(session['user_id'])
+    comments = Comment.get_by_quote_id(quote_id)
+    if not (0 <= comment_idx < len(comments)):
+        flash('Comment not found.')
+        return redirect(url_for('home'))
+    comment = comments[comment_idx]
+    if comment.author == (user.user_name or user.first_name):
+        Comment.delete_comment(comment.id)
+        flash('Comment deleted.')
+    else:
+        flash('You can only delete your own comments.')
+    return redirect(url_for('home'))
+
 # ------------------- RUN -------------------
 
 if __name__ == "__main__":
-    # For deployment, Railway automatically sets PORT
     import os
     port = int(os.environ.get("PORT", 8080))
-    app.run(host='0.0.0.0', port=port)
+    app.run(host='0.0.0.0', port=port, debug=True)
