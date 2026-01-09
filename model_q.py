@@ -15,20 +15,20 @@ class Qoute:
 
     @classmethod
     def get_all(cls):
-        query = "SELECT * FROM quotes ORDER BY post_date DESC;"
+        query = "SELECT * FROM qoute ORDER BY post_date DESC;"
         results = connectToMySQL('railway').query_db(query)
         return [cls(quote) for quote in results] if results else []
 
     @classmethod
     def get_by_id(cls, quote_id):
-        query = "SELECT * FROM quotes WHERE id = %(quote_id)s;"
+        query = "SELECT * FROM qoute WHERE id = %(quote_id)s;"
         data = {'quote_id': quote_id}
         result = connectToMySQL('railway').query_db(query, data)
         return cls(result[0]) if result and len(result) > 0 else None
 
     @classmethod
     def get_by_name(cls, name):
-        query = "SELECT * FROM quotes WHERE name = %(name)s;"
+        query = "SELECT * FROM qoute WHERE name = %(name)s;"
         data = {'name': name}
         result = connectToMySQL('railway').query_db(query, data)
         return cls(result[0]) if result and len(result) > 0 else None
@@ -36,7 +36,7 @@ class Qoute:
     @classmethod
     def save_quote(cls, data):
         query = (
-            "INSERT INTO quotes (name, comment, qoute, users_id, post_date, likes, dislikes) "
+            "INSERT INTO qoute (name, comment, qoute, users_id, post_date, likes, dislikes) "
             "VALUES (%(name)s, %(comment)s, %(qoute)s, %(users_id)s, %(post_date)s, %(likes)s, %(dislikes)s);"
         )
         new_id = connectToMySQL('railway').query_db(query, data)
@@ -45,7 +45,7 @@ class Qoute:
     @classmethod
     def update_quote_by_id(cls, data):
         query = (
-            "UPDATE quotes SET name=%(name)s, comment=%(comment)s, qoute=%(qoute)s, "
+            "UPDATE qoute SET name=%(name)s, comment=%(comment)s, qoute=%(qoute)s, "
             "users_id=%(users_id)s, post_date=%(post_date)s, likes=%(likes)s, dislikes=%(dislikes)s, edited=%(edited)s "
             "WHERE id=%(id)s;"
         )
@@ -53,7 +53,7 @@ class Qoute:
 
     @classmethod
     def delete_quote_by_id(cls, quote_id):
-        query = "DELETE FROM quotes WHERE id=%(quote_id)s;"
+        query = "DELETE FROM qoute WHERE id=%(quote_id)s;"
         data = {'quote_id': quote_id}
         return connectToMySQL('railway').query_db(query, data)
 
