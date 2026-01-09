@@ -15,37 +15,32 @@ class User:
 
     @classmethod
     def get_all(cls):
-        query = "SELECT * FROM qouteschema.users;"
-        results = connectToMySQL('qouteschema').query_db(query)
-        users = []
-        for user in results:
-            users.append(cls(user))
-        return users
-    
+        query = "SELECT * FROM users;"
+        results = connectToMySQL('railway').query_db(query)
+        return [cls(user) for user in results] if results else []
+
     @classmethod
     def get_by_email(cls, email):
-        query = "SELECT * FROM qouteschema.users WHERE email = %(email)s"
+        query = "SELECT * FROM users WHERE email = %(email)s;"
         data = {'email': email}
-        result = connectToMySQL('qouteschema').query_db(query, data)
-        if len(result) > 0:
-            return cls(result[0])
-        else:
-            return None
-    
+        result = connectToMySQL('railway').query_db(query, data)
+        return cls(result[0]) if result and len(result) > 0 else None
+
     @classmethod
     def get_by_id(cls, user_id):
-        query = "SELECT * FROM qouteschema.users WHERE id = %(user_id)s"
+        query = "SELECT * FROM users WHERE id = %(user_id)s;"
         data = {'user_id': user_id}
-        result = connectToMySQL('qouteschema').query_db(query, data)
-        if len(result) > 0:
-            return cls(result[0])
-        else:
-            return None
+        result = connectToMySQL('railway').query_db(query, data)
+        return cls(result[0]) if result and len(result) > 0 else None
 
     @classmethod
     def save_user(cls, data):
-        query = "INSERT INTO qouteschema.users (first_name, last_name, user_name, email, password) VALUES (%(first_name)s, %(last_name)s, %(user_name)s, %(email)s, %(password)s)"
-        return connectToMySQL('qouteschema').query_db(query, data)
+        query = (
+            "INSERT INTO users (first_name, last_name, user_name, email, password) "
+            "VALUES (%(first_name)s, %(last_name)s, %(user_name)s, %(email)s, %(password)s);"
+        )
+        return connectToMySQL('railway').query_db(query, data)
+
     @staticmethod
     def validate_user(form_data):
         is_valid = True
