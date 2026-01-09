@@ -138,31 +138,36 @@ def add_comment(quote_id):
 
 @app.route('/edit/quote/<int:quote_id>', methods=['GET', 'POST'])
 def update_quote(quote_id):
-    if 'user_id' not in session:
-        return redirect(url_for('login'))
-    user = User.get_by_id(session['user_id'])
     quote = Qoute.get_by_id(quote_id)
-    if not quote or quote.users_id != user.id:
-        return redirect(url_for('home'))
+    user = User.get_by_id(session['user_id'])
+    if not user:
+        session.clear()
+        flash('Session expired. Please log in again.')
+        return redirect(url_for('login'))
+    
+    if quote is None or quote.users_id != user.id:
+        return redirect(url_for('menu'))
+    
     if request.method == 'POST':
         if not Qoute.validate_quote(request.form):
             return redirect(url_for('update_quote', quote_id=quote_id))
+        import datetime
         data = {
             'id': quote.id,
-            'name': user.user_name or user.first_name,
+            'name': user.user_name if user.user_name else user.first_name,
+            'comment': request.form.get('comment'),
             'qoute': request.form.get('qoute'),
             'users_id': user.id,
             'post_date': datetime.date.today().isoformat(),
-            'likes': quote.likes or 0,
             'dislikes': quote.dislikes or 0,
+            'likes': quote.likes or 0,
             'edited': True
         }
-        edited_quotes = set(session.get('edited_quotes', []))
-        edited_quotes.add(quote.id)
-        session['edited_quotes'] = list(edited_quotes)
         Qoute.update_quote_by_id(data)
         return redirect(url_for('home'))
+    
     return render_template('update.html', user=user, quote=quote)
+
 
 @app.route('/delete_quote/<int:quote_id>', methods=['POST'])
 def delete_quote_by_id(quote_id):
