@@ -1,90 +1,66 @@
 from mysqlconnection import connectToMySQL
 from flask import flash
 
-
 class Qoute:
     def __init__(self, data):
-        self.id = data.get('id')
-        self.users_id = data.get('users_id')
-        self.name = data.get('name')
-        self.comment = data.get('comment')
-        self.qoute = data.get('qoute')
-        self.post_date = data.get('post_date')
-        self.dislikes = data.get('dislikes', 0)
+        self.id = data['id']
+        self.name = data['name']
+        self.qoute = data['qoute']
+        self.comment = data.get('comment', '')
+        self.users_id = data['users_id']
+        self.post_date = data['post_date']
         self.likes = data.get('likes', 0)
+        self.dislikes = data.get('dislikes', 0)
+        self.edited = data.get('edited', False)
 
     @classmethod
     def get_all(cls):
-        query = "SELECT * FROM qouteschema.Qoute;"
-        results = connectToMySQL('qouteschema').query_db(query)
-        qoutes = []
-        if results:
-            for q in results:
-                qoutes.append(cls(q))
-        return qoutes
-
-    @classmethod
-    def get_by_name(cls, name):
-        query = "SELECT * FROM qouteschema.Qoute WHERE name = %(name)s;"
-        data = {'name': name}
-        result = connectToMySQL('qouteschema').query_db(query, data)
-        if result and len(result) > 0:
-            return cls(result[0])
-        return None
+        query = "SELECT * FROM quotes ORDER BY post_date DESC;"
+        results = connectToMySQL('railway').query_db(query)
+        return [cls(quote) for quote in results] if results else []
 
     @classmethod
     def get_by_id(cls, quote_id):
-        query = "SELECT * FROM qouteschema.Qoute WHERE id = %(id)s;"
-        data = {'id': quote_id}
-        result = connectToMySQL('qouteschema').query_db(query, data)
-        if result and len(result) > 0:
-            return cls(result[0])
-        return None
+        query = "SELECT * FROM quotes WHERE id = %(quote_id)s;"
+        data = {'quote_id': quote_id}
+        result = connectToMySQL('railway').query_db(query, data)
+        return cls(result[0]) if result and len(result) > 0 else None
+
+    @classmethod
+    def get_by_name(cls, name):
+        query = "SELECT * FROM quotes WHERE name = %(name)s;"
+        data = {'name': name}
+        result = connectToMySQL('railway').query_db(query, data)
+        return cls(result[0]) if result and len(result) > 0 else None
 
     @classmethod
     def save_quote(cls, data):
         query = (
-            "INSERT INTO qouteschema.Qoute (name, comment, qoute, users_id, post_date, dislikes, likes) "
-            "VALUES (%(name)s, %(comment)s, %(qoute)s, %(users_id)s, %(post_date)s, %(dislikes)s, %(likes)s);"
+            "INSERT INTO quotes (name, comment, qoute, users_id, post_date, likes, dislikes) "
+            "VALUES (%(name)s, %(comment)s, %(qoute)s, %(users_id)s, %(post_date)s, %(likes)s, %(dislikes)s);"
         )
-        return connectToMySQL('qouteschema').query_db(query, data)
-
-    @classmethod
-    def delete_quote_by_id(cls, quote_id):
-        query = "DELETE FROM qouteschema.Qoute WHERE id = %(id)s;"
-        data = {'id': quote_id}
-        return connectToMySQL('qouteschema').query_db(query, data)
+        new_id = connectToMySQL('railway').query_db(query, data)
+        return new_id
 
     @classmethod
     def update_quote_by_id(cls, data):
-        # Only update provided fields, fallback to current values for missing ones
-        quote = cls.get_by_id(data['id'])
-        if not quote:
-            return None
-        update_data = {
-            'id': data['id'],
-            'name': data.get('name', quote.name),
-            'comment': data.get('comment', quote.comment),
-            'qoute': data.get('qoute', quote.qoute),
-            'post_date': data.get('post_date', quote.post_date),
-            'dislikes': data.get('dislikes', quote.dislikes),
-            'likes': data.get('likes', quote.likes)
-        }
         query = (
-            "UPDATE qouteschema.Qoute SET name=%(name)s, comment=%(comment)s, qoute=%(qoute)s, "
-            "post_date=%(post_date)s, dislikes=%(dislikes)s, likes=%(likes)s WHERE id=%(id)s;"
+            "UPDATE quotes SET name=%(name)s, comment=%(comment)s, qoute=%(qoute)s, "
+            "users_id=%(users_id)s, post_date=%(post_date)s, likes=%(likes)s, dislikes=%(dislikes)s, edited=%(edited)s "
+            "WHERE id=%(id)s;"
         )
-        return connectToMySQL('qouteschema').query_db(query, update_data)
+        return connectToMySQL('railway').query_db(query, data)
 
+    @classmethod
+    def delete_quote_by_id(cls, quote_id):
+        query = "DELETE FROM quotes WHERE id=%(quote_id)s;"
+        data = {'quote_id': quote_id}
+        return connectToMySQL('railway').query_db(query, data)
 
     @staticmethod
     def validate_quote(form_data):
         is_valid = True
-        # Name is now set from the user, not the form, so skip name validation
-        # Comment is not required on quote creation
-        if 'qoute' not in form_data or len(form_data['qoute']) < 5:
-            flash('Quote must be at least 5 characters long.')
+        if not form_data.get('qoute') or len(form_data['qoute'].strip()) < 1:
+            flash('Quote cannot be empty.')
             is_valid = False
         return is_valid
-
-    

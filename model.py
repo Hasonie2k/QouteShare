@@ -9,7 +9,7 @@ class User:
         self.id = data['id']
         self.first_name = data['first_name']
         self.last_name = data['last_name']
-        self.user_name = data['user_name']
+        self.user_name = data.get('user_name', '')
         self.email = data['email']
         self.password = data['password']
 
@@ -39,24 +39,25 @@ class User:
             "INSERT INTO users (first_name, last_name, user_name, email, password) "
             "VALUES (%(first_name)s, %(last_name)s, %(user_name)s, %(email)s, %(password)s);"
         )
-        return connectToMySQL('railway').query_db(query, data)
+        new_id = connectToMySQL('railway').query_db(query, data)
+        return new_id
 
     @staticmethod
     def validate_user(form_data):
         is_valid = True
         if len(form_data['first_name']) < 2:
-            flash('First name must be more than 2 characters long.')
+            flash('First name must be at least 2 characters.')
             is_valid = False
         if len(form_data['last_name']) < 2:
-            flash('Last name must be more than 2 characters long.')
+            flash('Last name must be at least 2 characters.')
             is_valid = False
         if not EMAIL_REGEX.match(form_data['email']):
             flash('Invalid email address.')
             is_valid = False
         if len(form_data['password']) < 5:
-            flash('Password must be at least 5 characters long.')
+            flash('Password must be at least 5 characters.')
             is_valid = False
-        if form_data['confirm_password'] != form_data['password']:
+        if form_data.get('confirm_password') != form_data['password']:
             flash('Passwords must match.')
             is_valid = False
         return is_valid

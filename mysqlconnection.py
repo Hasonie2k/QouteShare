@@ -1,14 +1,13 @@
-import os
 import pymysql.cursors
 
 class MySQLConnection:
     def __init__(self, db=None):
         self.connection = pymysql.connect(
-            host=os.getenv('MYSQLHOST', 'nozomi.proxy.rlwy.net'),
-            user=os.getenv('MYSQLUSER', 'root'),
-            password=os.getenv('MYSQLPASSWORD', 'srnLtucTexMTNTanvhqbSRKGRMyhBhIW'),
-            db=os.getenv('MYSQLDATABASE', db or 'railway'),
-            port=int(os.getenv('MYSQLPORT', 58910)),
+            host='mysql.railway.internal',  # Railway internal host
+            user='root',
+            password='srnLtucTexMTNTanvhqbSRKGRMyhBhIW',
+            db=db or 'railway',
+            port=3306,                      # Railway internal port
             charset='utf8mb4',
             cursorclass=pymysql.cursors.DictCursor,
             autocommit=True
@@ -27,7 +26,6 @@ class MySQLConnection:
         except Exception as e:
             print("Database query error:", e)
             return False
-        # DO NOT close connection here — keep it open per request
 
 def connectToMySQL(db=None):
     return MySQLConnection(db)

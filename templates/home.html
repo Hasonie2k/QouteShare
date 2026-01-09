@@ -37,13 +37,9 @@
         <span class="author">{{ q.author_name }}</span>
         <span class="date">
           {% if q.post_date %}
-            {% if q.post_date.__class__.__name__ in ['date','datetime'] %}
-              {{ q.post_date.strftime('%m/%d/%Y') }}
-            {% else %}
-              {{ q.post_date.split(' ')[0].replace('-', '/') }}
-            {% endif %}
+            {{ q.post_date }}
           {% endif %}
-          {% if session['edited_quotes'] and q.id in session['edited_quotes'] %}
+          {% if session.get('edited_quotes') and q.id in session['edited_quotes'] %}
             <span class="edited">(edited)</span>
           {% endif %}
         </span>
@@ -71,12 +67,9 @@
             <span class="count dislike">{{ q.dislikes or 0 }}</span>
           </form>
 
-          {% if q.users_id %}
           <button class="icon-btn" type="button" onclick="toggleForm({{ q.id }})">💬</button>
-          {% endif %}
         </div>
 
-        <!-- Owner -->
         {% if q.users_id == user.id %}
         <div class="quote-owner-actions">
           <form action="{{ url_for('update_quote', users_id=q.id) }}" method="GET">
@@ -93,14 +86,12 @@
       </div>
 
       <!-- Comment box -->
-      {% if q.users_id %}
-      <div id="comment-{{ q.id }}" class="comment-box">
+      <div id="comment-{{ q.id }}" class="comment-box" style="display:none;">
         <form action="{{ url_for('add_comment', quote_id=q.id) }}" method="POST">
           <textarea name="comment_text" rows="3" placeholder="Write a comment..."></textarea>
           <input type="submit" value="Post Comment">
         </form>
       </div>
-      {% endif %}
 
       <!-- Comments -->
       {% if q.comments %}
@@ -112,25 +103,23 @@
             {% if c.date %}<span>{{ c.date }}</span>{% endif %}
             {% if c.edited %}<em>(edited)</em>{% endif %}
           </div>
-
           <div class="comment-text">{{ c.text }}</div>
 
           <!-- Like/Dislike for comments -->
           <div class="comment-social">
-            <form action="{{ url_for('like_comment', quote_id=q.id, comment_idx=loop.index0) }}" method="POST" style="display:inline;">
-              {% set liked_comments = session.get('liked_comments', []) %}
-              <button type="submit" class="icon-btn">
-                {% set comment_key = q.id|string ~ ':' ~ loop.index0 %}
-                {% if comment_key in liked_comments %}👎{% else %}👍{% endif %}
+            <form action="{{ url_for('like_comment', quote_id=q.id, comment_idx=loop.index0) }}" method="POST">
+              {% set comment_key = q.id|string ~ ':' ~ loop.index0 %}
+              <button type="submit">
+                {% if comment_key in session.get('liked_comments', []) %}👎{% else %}👍{% endif %}
               </button>
-              <span class="count like">{{ c.likes if c.likes is defined else 0 }}</span>
+              <span class="count like">{{ c.likes or 0 }}</span>
             </form>
-            <form action="{{ url_for('dislike_comment', quote_id=q.id, comment_idx=loop.index0) }}" method="POST" style="display:inline;">
-              {% set disliked_comments = session.get('disliked_comments', []) %}
-              <button type="submit" class="icon-btn">
-                {% if comment_key in disliked_comments %}👍{% else %}👎{% endif %}
+
+            <form action="{{ url_for('dislike_comment', quote_id=q.id, comment_idx=loop.index0) }}" method="POST">
+              <button type="submit">
+                {% if comment_key in session.get('disliked_comments', []) %}👍{% else %}👎{% endif %}
               </button>
-              <span class="count dislike">{{ c.dislikes if c.dislikes is defined else 0 }}</span>
+              <span class="count dislike">{{ c.dislikes or 0 }}</span>
             </form>
           </div>
 
