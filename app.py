@@ -222,7 +222,19 @@ def like_quote(quote_id):
     else:
         quote.likes = (quote.likes or 0) + 1
         liked_quotes.add(str(quote_id))
-    Qoute.update_quote_by_id(vars(quote))
+    # Use only expected fields
+    data = {
+        'id': quote.id,
+        'name': quote.name,
+        'comment': quote.comment if hasattr(quote, 'comment') else '',
+        'qoute': quote.qoute,
+        'users_id': quote.users_id,
+        'post_date': quote.post_date,
+        'likes': quote.likes,
+        'dislikes': quote.dislikes,
+        'edited': getattr(quote, 'edited', False)
+    }
+    Qoute.update_quote_by_id(data)
     session['liked_quotes'] = list(liked_quotes)
     return redirect(url_for('home'))
 
@@ -238,7 +250,19 @@ def dislike_quote(quote_id):
     else:
         quote.dislikes = (quote.dislikes or 0) + 1
         disliked_quotes.add(str(quote_id))
-    Qoute.update_quote_by_id(vars(quote))
+    # Use only expected fields
+    data = {
+        'id': quote.id,
+        'name': quote.name,
+        'comment': quote.comment if hasattr(quote, 'comment') else '',
+        'qoute': quote.qoute,
+        'users_id': quote.users_id,
+        'post_date': quote.post_date,
+        'likes': quote.likes,
+        'dislikes': quote.dislikes,
+        'edited': getattr(quote, 'edited', False)
+    }
+    Qoute.update_quote_by_id(data)
     session['disliked_quotes'] = list(disliked_quotes)
     return redirect(url_for('home'))
 
