@@ -43,7 +43,11 @@ class Qoute:
 
     @classmethod
     def update_quote_by_id(cls, data):
-        query = "UPDATE qoute SET qoute=%(qoute)s WHERE id=%(id)s;"
+        query = (
+            "UPDATE qoute SET name=%(name)s, comment=%(comment)s, qoute=%(qoute)s, "
+            "users_id=%(users_id)s, post_date=%(post_date)s, likes=%(likes)s, dislikes=%(dislikes)s "
+            "WHERE id=%(id)s;"
+        )
         return connectToMySQL('railway').query_db(query, data)
 
     @classmethod
