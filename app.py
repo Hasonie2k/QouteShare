@@ -179,7 +179,13 @@ def update_quote(quote_id):
             return redirect(url_for('update_quote', quote_id=quote_id))
         data = {
             'id': quote.id,
-            'qoute': request.form.get('qoute')
+            'name': quote.name,
+            'comment': quote.comment if hasattr(quote, 'comment') else '',
+            'qoute': request.form.get('qoute'),
+            'users_id': quote.users_id,
+            'post_date': quote.post_date,
+            'likes': quote.likes,
+            'dislikes': quote.dislikes
         }
         Qoute.update_quote_by_id(data)
         return redirect(url_for('home'))
