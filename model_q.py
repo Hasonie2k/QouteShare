@@ -3,7 +3,7 @@ from mysqlconnection import connectToMySQL
 from flask import flash
 
 
-class Quote:
+class Qoute:
     def __init__(self, data):
         self.id = data.get('id')
         self.users_id = data.get('users_id')
