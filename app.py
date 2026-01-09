@@ -177,15 +177,9 @@ def update_quote(quote_id):
     if request.method == 'POST':
         if not Qoute.validate_quote(request.form):
             return redirect(url_for('update_quote', quote_id=quote_id))
-        import datetime
         data = {
             'id': quote.id,
-            'name': user.user_name or user.first_name,
-            'qoute': request.form.get('qoute'),
-            'users_id': user.id,
-            'post_date': datetime.date.today().isoformat(),
-            'likes': quote.likes or 0,
-            'dislikes': quote.dislikes or 0
+            'qoute': request.form.get('qoute')
         }
         Qoute.update_quote_by_id(data)
         return redirect(url_for('home'))
