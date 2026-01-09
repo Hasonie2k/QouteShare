@@ -11,7 +11,6 @@ class Qoute:
         self.post_date = data['post_date']
         self.likes = data.get('likes', 0)
         self.dislikes = data.get('dislikes', 0)
-        self.edited = data.get('edited', False)
 
     @classmethod
     def get_all(cls):
@@ -46,10 +45,15 @@ class Qoute:
     def update_quote_by_id(cls, data):
         query = (
             "UPDATE qoute SET name=%(name)s, comment=%(comment)s, qoute=%(qoute)s, "
-            "users_id=%(users_id)s, post_date=%(post_date)s, likes=%(likes)s, dislikes=%(dislikes)s, edited=%(edited)s "
+            "users_id=%(users_id)s, post_date=%(post_date)s, likes=%(likes)s, dislikes=%(dislikes)s "
             "WHERE id=%(id)s;"
         )
-        return connectToMySQL('railway').query_db(query, data)
+        print('DEBUG: update_quote_by_id called with:')
+        print('Query:', query)
+        print('Data:', data)
+        result = connectToMySQL('railway').query_db(query, data)
+        print('Result:', result)
+        return result
 
     @classmethod
     def delete_quote_by_id(cls, quote_id):
